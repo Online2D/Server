@@ -1,8 +1,9 @@
 
 #include <Engine/Kernel.hpp>
+#include "Endpoint/LobbyProtocol.hpp"
 
 // -=(Undocumented)=-
-class GameServer : public EnableSmartPointer<GameServer>, public Core::Subsystem, public Network::Protocol
+class GameServer : public Core::Subsystem
 {
 public:
 
@@ -15,57 +16,27 @@ public:
     // -=(Undocumented)=-
     void OnDestroy()
     {
-        mEndpoint = nullptr;
     }
 
     // -=(Undocumented)=-
     void OnInitialize()
     {
-        mEndpoint = GetSubsystem<Network::Service>()->Listen(1000, "0.0.0.0", "7666");
-        mEndpoint->Attach(shared_from_this());
+        mServerLobbyProtocol = NewPtr<Endpoint::LobbyProtocol>();
+
+        mServer = GetSubsystem<Network::Service>()->Listen(1000, "0.0.0.0", "7666");
+        mServer->Attach(mServerLobbyProtocol);
     }
 
     // -=(Undocumented)=-
     void OnTick() override
     {
-
+        mServer->Flush();
     }
 
 private:
 
-    // -=(Undocumented)=-
-    void OnAttach(ConstSPtr<Network::Session> Session) override
-    {
-        LOG_INFO("Someone connected...");
-    }
-
-    // -=(Undocumented)=-
-    void OnDetach(ConstSPtr<Network::Session> Session) override
-    {
-        LOG_INFO("Someone disconnected...");
-    }
-
-    // -=(Undocumented)=-
-    void OnError(ConstSPtr<Network::Session> Session, UInt Error, CStr Description) override
-    {
-        LOG_INFO("Error from the underlying network service '{}'", Description);
-    }
-
-    // -=(Undocumented)=-
-    void OnRead(ConstSPtr<Network::Session> Session,  CPtr<UInt08> Bytes) override
-    {
-        LOG_INFO("Someone sent data...");
-    }
-
-    // -=(Undocumented)=-
-    void OnWrite(ConstSPtr<Network::Session> Session, CPtr<UInt08> Bytes) override
-    {
-        LOG_INFO("We wrote some data...");
-    }
-
-private:
-
-    SPtr<Network::Server> mEndpoint;
+    SPtr<Network::Server>         mServer;
+    SPtr<Endpoint::LobbyProtocol> mServerLobbyProtocol;
 };
 
 
