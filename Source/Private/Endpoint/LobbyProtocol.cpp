@@ -53,11 +53,17 @@ namespace Endpoint
 #define HANDLE_PACKET(Name) \
         case Name::k_ID: { Name Packet; Packet.Decode(Serializer); Handle_ ## Name (Session, Packet); break; }
 
-        switch (Reader Serializer(Bytes); Serializer.ReadInt<UInt>())
+        Reader Serializer(Bytes);
+        do
         {
-            HANDLE_PACKET(LobbyAccountLogin)
-            HANDLE_PACKET(LobbyAccountRegister)
+            switch (Serializer.ReadInt<UInt>())
+            {
+                HANDLE_PACKET(LobbyAccountLogin)
+                HANDLE_PACKET(LobbyAccountRegister)
+            }
         }
+        while (Serializer.GetAvailable() > 0);
+
     }
 
     // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
@@ -81,7 +87,7 @@ namespace Endpoint
 
     void LobbyProtocol::Handle_LobbyAccountRegister(ConstSPtr<Network::Session> Session, Ref<const LobbyAccountRegister> Message)
     {
-        LOG_INFO("LobbyProtocol::Handle_LobbyAccountRegister {}:{}", Message.Username, Message.Password);
+        LOG_INFO("LobbyProtocol::Handle_LobbyAccountRegister {}:{}:{}", Message.Username, Message.Password, Message.Email);
     }
 
 }
