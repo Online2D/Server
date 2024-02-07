@@ -21,17 +21,6 @@
 namespace Endpoint
 {
     // -=(Undocumented)=-
-    struct LobbyReady
-        : public Network::Packet<LobbyReady, 0>
-    {
-        // -=(Undocumented)=-
-        template<typename Stream>
-        void OnSerialize(Stream Archive)
-        {
-        }
-    };
-
-    // -=(Undocumented)=-
     struct LobbyAccountLogin
         : public Network::Packet<LobbyAccountLogin, 1>
     {

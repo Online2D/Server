@@ -26,10 +26,11 @@ namespace Game
     public:
 
         // -=(Undocumented)=-
-        Account(UInt ID, CStr Username, CStr Password)
+        Account(UInt ID, CStr Username, CStr Password, CStr Email)
             : mID       { ID },
               mUsername { Username },
-              mPassword { Password }
+              mPassword { Password },
+              mEmail    { Email }
         {
         }
 
@@ -51,6 +52,12 @@ namespace Game
             return mPassword;
         }
 
+        // -=(Undocumented)=-
+        CStr GetEmail() const
+        {
+            return mEmail;
+        }
+
     private:
 
         // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
@@ -59,5 +66,6 @@ namespace Game
         const UInt mID;
         const SStr mUsername;
         const SStr mPassword;
+        const SStr mEmail;
     };
 }

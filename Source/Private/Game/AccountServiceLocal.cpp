@@ -73,7 +73,11 @@ namespace Game
     {
         const TOMLSection Root = Parser.GetRoot();
 
-        return NewPtr<Account>(Root.GetNumber("ID"), Root.GetString("Username"), Root.GetString("Password"));
+        return NewPtr<Account>(
+            Root.GetNumber("ID"),
+            Root.GetString("Username"),
+            Root.GetString("Password"),
+            Root.GetString("Email"));
     }
 
     // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
@@ -86,5 +90,6 @@ namespace Game
         Root.SetNumber("ID", Account->GetID());
         Root.SetString("Username", Account->GetUsername());
         Root.SetString("Password", Account->GetPassword());
+        Root.SetString("Email", Account->GetEmail());
     }
 }

@@ -19,20 +19,21 @@
 
 namespace Endpoint
 {
+    // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+    // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
     LobbyProtocol::LobbyProtocol(ConstSPtr<Game::AccountServiceLocal> AccountService)
-        : mAccountService{ AccountService }
+        : mAccountService { AccountService }
     {
 
     }
+
     // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
     // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
     void LobbyProtocol::OnAttach(ConstSPtr<Network::Client> Client)
     {
         LOG_INFO("LobbyProtocol::OnAttach");
-
-        Client->Write(LobbyReady());
     }
 
     // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
@@ -97,7 +98,7 @@ namespace Endpoint
         LOG_INFO("LobbyProtocol::Handle_LobbyAccountRegister {}:{}:{}", Message.Username, Message.Password, Message.Email);
 
         //TODO: Testing purpose
-        SPtr<Game::Account> Account = NewPtr<Game::Account>(1, Message.Username, Message.Password);
+        SPtr<Game::Account> Account = NewPtr<Game::Account>(1, Message.Username, Message.Password, Message.Email);
         mAccountService->Create(Account);
     }
 
@@ -105,7 +106,8 @@ namespace Endpoint
     {
         LOG_INFO("LobbyProtocol::Handle_LobbyAccountDelete {}", Message.Username);
 
-        mAccountService->Delete(Message.Username);
+        SPtr<Game::Account> Account = mAccountService->GetByUsername(Message.Username);
+        mAccountService->Delete(Account->GetID());
     }
 
 }
