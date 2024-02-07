@@ -1,6 +1,7 @@
 
 #include <Engine/Kernel.hpp>
 #include "Endpoint/LobbyProtocol.hpp"
+#include "Game/AccountServiceLocal.hpp"
 
 // -=(Undocumented)=-
 class GameServer : public Core::Subsystem
@@ -21,10 +22,13 @@ public:
     // -=(Undocumented)=-
     void OnInitialize()
     {
-        mServerLobbyProtocol = NewPtr<Endpoint::LobbyProtocol>();
+
+        mAccountService = NewPtr<Game::AccountServiceLocal>(GetContext());
+        mServerLobbyProtocol = NewPtr<Endpoint::LobbyProtocol>(mAccountService);
 
         mServer = GetSubsystem<Network::Service>()->Listen(1000, "0.0.0.0", "7666");
         mServer->Attach(mServerLobbyProtocol);
+
     }
 
     // -=(Undocumented)=-
@@ -35,8 +39,9 @@ public:
 
 private:
 
-    SPtr<Network::Server>         mServer;
-    SPtr<Endpoint::LobbyProtocol> mServerLobbyProtocol;
+    SPtr<Game::AccountServiceLocal> mAccountService;
+    SPtr<Network::Server>           mServer;
+    SPtr<Endpoint::LobbyProtocol>   mServerLobbyProtocol;
 };
 
 
