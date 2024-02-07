@@ -12,10 +12,11 @@
 // [  HEADER  ]
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
-#include <Network/Session.hpp>
+#include <Network/Client.hpp>
 #include <Network/Protocol.hpp>
-#include "LobbyPackets.hpp"
+#include <Game/AccountServiceLocal.hpp>
 
+#include "LobbyPackets.hpp"
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 // [   CODE   ]
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
@@ -27,28 +28,35 @@ namespace Endpoint
     {
     public:
 
-        // -=(Undocumented)=-
-        void OnAttach(ConstSPtr<Network::Session> Session) override;
+        LobbyProtocol(ConstSPtr<Game::AccountServiceLocal> AccountService);
 
         // -=(Undocumented)=-
-        void OnDetach(ConstSPtr<Network::Session> Session) override;
+        void OnAttach(ConstSPtr<Network::Client> Client) override;
 
         // -=(Undocumented)=-
-        void OnError(ConstSPtr<Network::Session> Session, UInt Error, CStr Description) override;
+        void OnDetach(ConstSPtr<Network::Client> Client) override;
 
         // -=(Undocumented)=-
-        void OnRead(ConstSPtr<Network::Session> Session,  CPtr<UInt08> Bytes) override;
+        void OnError(ConstSPtr<Network::Client> Client, UInt Error, CStr Description) override;
 
         // -=(Undocumented)=-
-        void OnWrite(ConstSPtr<Network::Session> Session, CPtr<UInt08> Bytes) override;
+        void OnRead(ConstSPtr<Network::Client> Client,  CPtr<UInt08> Bytes) override;
+
+        // -=(Undocumented)=-
+        void OnWrite(ConstSPtr<Network::Client> Client, CPtr<UInt08> Bytes) override;
 
     private:
 
         // -=(Undocumented)=-
-        void Handle_LobbyAccountLogin(ConstSPtr<Network::Session> Session, Ref<const LobbyAccountLogin> Message);
+        void Handle_LobbyAccountLogin(ConstSPtr<Network::Client> Client, Ref<const LobbyAccountLogin> Message);
 
         // -=(Undocumented)=-
-        void Handle_LobbyAccountRegister(ConstSPtr<Network::Session> Session, Ref<const LobbyAccountRegister> Message);
+        void Handle_LobbyAccountRegister(ConstSPtr<Network::Client> Client, Ref<const LobbyAccountRegister> Message);
 
+        // -=(Undocumented)=-
+        void Handle_LobbyAccountDelete(ConstSPtr<Network::Client> Client, Ref<const LobbyAccountDelete> Message);
+    private:
+
+        SPtr<Game::AccountServiceLocal> mAccountService;
     };
 }
