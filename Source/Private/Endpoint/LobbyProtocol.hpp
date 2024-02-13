@@ -55,7 +55,22 @@ namespace Endpoint
 
         // -=(Undocumented)=-
         void Handle_LobbyAccountDelete(ConstSPtr<Network::Client> Client, Ref<const LobbyAccountDelete> Message);
+
     private:
+
+        // -=(Undocumented)=-
+        Bool Validate_Username(CStr Username);
+
+        // -=(Undocumented)=-
+        Bool Validate_Password(CStr Password);
+
+        // -=(Undocumented)=-
+        Bool Validate_Email(CStr Email);
+
+    private:
+
+        // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+        // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
         SPtr<Game::AccountServiceLocal> mAccountService;
     };

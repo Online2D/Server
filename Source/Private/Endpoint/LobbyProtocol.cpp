@@ -25,7 +25,6 @@ namespace Endpoint
     LobbyProtocol::LobbyProtocol(ConstSPtr<Game::AccountServiceLocal> AccountService)
         : mAccountService { AccountService }
     {
-
     }
 
     // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
@@ -87,25 +86,22 @@ namespace Endpoint
 
     void LobbyProtocol::Handle_LobbyAccountLogin(ConstSPtr<Network::Client> Client, Ref<const LobbyAccountLogin> Message)
     {
-        LOG_INFO("LobbyProtocol::Handle_LobbyAccountLogin {}:{}", Message.Username, Message.Password);
+        LOG_DEBUG("LobbyProtocol::Handle_LobbyAccountLogin {}:{}", Message.Username, Message.Password);
 
-        //TODO: Testing purpose
-        SPtr<Game::Account> Account = mAccountService->GetByUsername(Message.Username);
-
-        if (Account)
+        if (!Validate_Username(Message.Username) || !Validate_Password(Message.Password))
         {
-            if (Account->GetPassword() == Message.Password)
-            {
-                LOG_INFO("{} logged!", Message.Username);
-            }
-            else
-            {
-                LOG_INFO("{} mismatch password", Message.Username);
-            }
+            return;
+        }
+
+        const SPtr<Game::Account> Account = mAccountService->GetByUsername(Message.Username);
+
+        if (Account && Account->GetPassword() == Message.Password)
+        {
+            // TODO: Logged
         }
         else
         {
-            LOG_INFO("{} can't be found in the database", Message.Username);
+            // TODO: Error: Not Found
         }
     }
 
@@ -114,43 +110,87 @@ namespace Endpoint
 
     void LobbyProtocol::Handle_LobbyAccountRegister(ConstSPtr<Network::Client> Client, Ref<const LobbyAccountRegister> Message)
     {
-        LOG_INFO("LobbyProtocol::Handle_LobbyAccountRegister {}:{}:{}", Message.Username, Message.Password, Message.Email);
+        LOG_DEBUG("LobbyProtocol::Handle_LobbyAccountRegister {}:{}:{}", Message.Username, Message.Password, Message.Email);
 
-        //TODO: Testing purpose
-        SPtr<Game::Account> Account = mAccountService->GetByUsername(Message.Username);
-        if (Account)
+        if (!Validate_Username(Message.Username) || !Validate_Password(Message.Password) || !Validate_Email(Message.Email))
         {
-            LOG_INFO("{} failed to create: already exist", Message.Username);
+            return;
         }
-        else
+
+        SPtr<Game::Account> Account = mAccountService->GetByUsername(Message.Username);
+
+        if (!Account)
         {
-            Account = NewPtr<Game::Account>(1, Message.Username, Message.Password, Message.Email);
+            Account = NewPtr<Game::Account>(1 /* TODO */, Message.Username, Message.Password, Message.Email);
+
             if (mAccountService->Create(Account))
             {
-                LOG_INFO("{} account created!", Message.Username);
+                // TODO: Created -> Login
             }
             else
             {
-                LOG_INFO("{} failed to create", Message.Username);
+                // TODO: Error: Failed to create
             }
-        }
-    }
-
-    void LobbyProtocol::Handle_LobbyAccountDelete(ConstSPtr<Network::Client> Client, Ref<const LobbyAccountDelete> Message)
-    {
-        LOG_INFO("LobbyProtocol::Handle_LobbyAccountDelete {}", Message.Username);
-
-        //TODO: Testing purpose
-        SPtr<Game::Account> Account = mAccountService->GetByUsername(Message.Username);
-        if (mAccountService->Delete(Account))
-        {
-            LOG_INFO("{} account delete!", Message.Username);
         }
         else
         {
-            LOG_INFO("{} failed to delete", Message.Username);
+            // TODO: Error: Already created
         }
     }
 
+    // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+    // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+
+    void LobbyProtocol::Handle_LobbyAccountDelete(ConstSPtr<Network::Client> Client, Ref<const LobbyAccountDelete> Message)
+    {
+        LOG_DEBUG("LobbyProtocol::Handle_LobbyAccountDelete {}:{}", Message.Username, Message.Password);
+
+        if (!Validate_Username(Message.Username) || !Validate_Password(Message.Password))
+        {
+            return;
+        }
+
+        const SPtr<Game::Account> Account = mAccountService->GetByUsername(Message.Username);
+
+        if (Account && Account->GetPassword() == Message.Password)
+        {
+            if (mAccountService->Delete(Account))
+            {
+                // TODO: Successful
+            }
+            else
+            {
+                // TODO: Error: Failed to delete
+            }
+        }
+        else
+        {
+            // TODO: Error: Not Found
+        }
+    }
+
+    // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+    // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+
+    Bool LobbyProtocol::Validate_Username(CStr Username)
+    {
+        return Username.size() >= 4 && Username.size() < 20;
+    }
+
+    // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+    // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+
+    Bool LobbyProtocol::Validate_Password(CStr Password)
+    {
+        return Password.size() == 32;
+    }
+
+    // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+    // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+
+    Bool LobbyProtocol::Validate_Email(CStr Email)
+    {
+        return Email.find_first_of('@') != CStr::npos;
+    }
 }
 

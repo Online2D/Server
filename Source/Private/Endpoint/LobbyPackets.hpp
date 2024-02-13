@@ -80,13 +80,15 @@ namespace Endpoint
         : public Network::Packet<LobbyAccountDelete, 3>
     {
         SStr Username;
+        SStr Password;
 
         // -=(Undocumented)=-
         LobbyAccountDelete() = default;
 
         // -=(Undocumented)=-
-        LobbyAccountDelete(CStr Username)
-            : Username{ Username }
+        LobbyAccountDelete(CStr Username, CStr Password)
+            : Username { Username },
+              Password { Password }
         {
         }
 
@@ -95,6 +97,7 @@ namespace Endpoint
         void OnSerialize(Stream Archive)
         {
             Archive.SerializeString8(Username);
+            Archive.SerializeString8(Password);
         }
     };
 }
