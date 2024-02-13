@@ -38,24 +38,24 @@ namespace Game
         Bool Create(ConstSPtr<Account> Account) override;
 
         // -=(Undocumented)=-
-        Bool Delete(UInt ID) override;
+        Bool Delete(ConstSPtr<Account> Account) override;
 
         // -=(Undocumented)=-
         Bool Update(ConstSPtr<Account> Account) override;
 
         // -=(Undocumented)=-
-        SPtr<Account> GetByID(UInt ID) const override;
+        SPtr<Account> GetByID(UInt ID) override;
 
         // -=(Undocumented)=-
-        SPtr<Account> GetByUsername(CStr Username) const override;
+        SPtr<Account> GetByUsername(CStr Username) override;
 
     private:
 
         // -=(Undocumented)=-
-        SPtr<Account> Load(Ref<TOMLParser> Parser);
+        SPtr<Account> Load(CStr Data);
 
         // -=(Undocumented)=-
-        void Save(Ref<TOMLParser> Parser, ConstSPtr<Account> Account);
+        SStr Save(ConstSPtr<Account> Account);
 
     private:
 

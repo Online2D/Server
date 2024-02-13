@@ -88,6 +88,25 @@ namespace Endpoint
     void LobbyProtocol::Handle_LobbyAccountLogin(ConstSPtr<Network::Client> Client, Ref<const LobbyAccountLogin> Message)
     {
         LOG_INFO("LobbyProtocol::Handle_LobbyAccountLogin {}:{}", Message.Username, Message.Password);
+
+        //TODO: Testing purpose
+        SPtr<Game::Account> Account = mAccountService->GetByUsername(Message.Username);
+
+        if (Account)
+        {
+            if (Account->GetPassword() == Message.Password)
+            {
+                LOG_INFO("{} logged!", Message.Username);
+            }
+            else
+            {
+                LOG_INFO("{} mismatch password", Message.Username);
+            }
+        }
+        else
+        {
+            LOG_INFO("{} can't be found in the database", Message.Username);
+        }
     }
 
     // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
@@ -98,16 +117,39 @@ namespace Endpoint
         LOG_INFO("LobbyProtocol::Handle_LobbyAccountRegister {}:{}:{}", Message.Username, Message.Password, Message.Email);
 
         //TODO: Testing purpose
-        SPtr<Game::Account> Account = NewPtr<Game::Account>(1, Message.Username, Message.Password, Message.Email);
-        mAccountService->Create(Account);
+        SPtr<Game::Account> Account = mAccountService->GetByUsername(Message.Username);
+        if (Account)
+        {
+            LOG_INFO("{} failed to create: already exist", Message.Username);
+        }
+        else
+        {
+            Account = NewPtr<Game::Account>(1, Message.Username, Message.Password, Message.Email);
+            if (mAccountService->Create(Account))
+            {
+                LOG_INFO("{} account created!", Message.Username);
+            }
+            else
+            {
+                LOG_INFO("{} failed to create", Message.Username);
+            }
+        }
     }
 
     void LobbyProtocol::Handle_LobbyAccountDelete(ConstSPtr<Network::Client> Client, Ref<const LobbyAccountDelete> Message)
     {
         LOG_INFO("LobbyProtocol::Handle_LobbyAccountDelete {}", Message.Username);
 
+        //TODO: Testing purpose
         SPtr<Game::Account> Account = mAccountService->GetByUsername(Message.Username);
-        mAccountService->Delete(Account->GetID());
+        if (mAccountService->Delete(Account))
+        {
+            LOG_INFO("{} account delete!", Message.Username);
+        }
+        else
+        {
+            LOG_INFO("{} failed to delete", Message.Username);
+        }
     }
 
 }

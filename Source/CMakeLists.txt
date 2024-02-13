@@ -30,12 +30,9 @@ LIST(APPEND PROJECT_INCLUDE ${CMAKE_CURRENT_SOURCE_DIR}/Private)
 ## Dependency (Aurora Engine)
 ## -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
-ADD_COMPILE_DEFINITIONS(AURORA_HEADLESS_MODE)
-
 FetchContent_Declare(External_Aurora
         GIT_REPOSITORY https://github.com/wolftein/Aurora
-        GIT_TAG main
-        GIT_PROGRESS TRUE)
+        GIT_TAG main)
 FetchContent_MakeAvailable(External_Aurora)
 
 LIST(APPEND PROJECT_DEPENDENCIES "Aurora_Engine")

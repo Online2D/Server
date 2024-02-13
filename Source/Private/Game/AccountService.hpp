@@ -29,15 +29,15 @@ namespace Game
         virtual Bool Create(ConstSPtr<Account> Account) = 0;
 
         // -=(Undocumented)=-
-        virtual Bool Delete(UInt ID) = 0;
+        virtual Bool Delete(ConstSPtr<Account> Account) = 0;
 
         // -=(Undocumented)=-
         virtual Bool Update(ConstSPtr<Account> Account) = 0;
 
         // -=(Undocumented)=-
-        virtual SPtr<Account> GetByID(UInt ID) const = 0;
+        virtual SPtr<Account> GetByID(UInt ID) = 0;
 
         // -=(Undocumented)=-
-        virtual SPtr<Account> GetByUsername(CStr Username) const = 0;
+        virtual SPtr<Account> GetByUsername(CStr Username) = 0;
     };
 }

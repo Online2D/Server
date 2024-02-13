@@ -24,6 +24,7 @@ namespace Game
     AccountServiceLocal::AccountServiceLocal(Ref<Subsystem::Context> Context)
         : mFilesystem { Context.GetSubsystem<Content::Service>() }
     {
+
     }
 
     // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
@@ -31,15 +32,19 @@ namespace Game
 
     Bool AccountServiceLocal::Create(ConstSPtr<Account> Account)
     {
-        return false; // TODO
+        const Content::Uri Uri(Format("Database://Account/{}", Account->GetUsername()));
+
+        return mFilesystem->Save(Uri, Save(Account));
     }
 
     // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
     // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
-    Bool AccountServiceLocal::Delete(UInt ID)
+    Bool AccountServiceLocal::Delete(ConstSPtr<Account> Account)
     {
-        return false; // TODO
+        Content::Uri Uri(Format("Database://Account/{}", Account->GetUsername()));
+
+        return mFilesystem->Delete(Uri);
     }
 
     // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
@@ -47,13 +52,15 @@ namespace Game
 
     Bool AccountServiceLocal::Update(ConstSPtr<Account> Account)
     {
-        return false; // TODO
+        const Content::Uri Uri(Format("Database://Account/{}", Account->GetUsername()));
+
+        return mFilesystem->Save(Uri, Save(Account));
     }
 
     // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
     // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
-    SPtr<Account> AccountServiceLocal::GetByID(UInt ID) const
+    SPtr<Account> AccountServiceLocal::GetByID(UInt ID)
     {
         return nullptr; // TODO
     }
@@ -61,17 +68,24 @@ namespace Game
     // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
     // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
-    SPtr<Account> AccountServiceLocal::GetByUsername(CStr Username) const
+    SPtr<Account> AccountServiceLocal::GetByUsername(CStr Username)
     {
-        return nullptr; // TODO
+        const Content::Uri Uri(Format("Database://Account/{}", Username));
+
+        if (const Chunk Data = mFilesystem->Find(Uri); Data.HasData())
+        {
+            return Load(Data.GetText());
+        }
+        return nullptr;
     }
 
     // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
     // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
-    SPtr<Account> AccountServiceLocal::Load(Ref<TOMLParser> Parser)
+    SPtr<Account> AccountServiceLocal::Load(CStr Data)
     {
-        const TOMLSection Root = Parser.GetRoot();
+        TOMLParser  Parser(Data);
+        TOMLSection Root = Parser.GetRoot();
 
         return NewPtr<Account>(
             Root.GetNumber("ID"),
@@ -83,13 +97,16 @@ namespace Game
     // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
     // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
-    void AccountServiceLocal::Save(Ref<TOMLParser> Parser, ConstSPtr<Account> Account)
+    SStr AccountServiceLocal::Save(ConstSPtr<Account> Account)
     {
+        TOMLParser  Parser;
         TOMLSection Root = Parser.GetRoot();
 
         Root.SetNumber("ID", Account->GetID());
         Root.SetString("Username", Account->GetUsername());
         Root.SetString("Password", Account->GetPassword());
         Root.SetString("Email", Account->GetEmail());
+
+        return Parser.Dump();
     }
 }
