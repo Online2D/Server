@@ -26,11 +26,12 @@ namespace Game
     public:
 
         // -=(Undocumented)=-
-        Account(UInt ID, CStr Username, CStr Password, CStr Email)
-            : mID       { ID },
-              mUsername { Username },
-              mPassword { Password },
-              mEmail    { Email }
+        Account(UInt ID, CStr Username, CStr Password, CStr Email, Vector<UInt> Characters)
+            :   mID { ID },
+                mUsername { Username },
+                mPassword { Password },
+                mEmail { Email },
+                mCharacters { Characters }
         {
         }
 
@@ -58,14 +59,19 @@ namespace Game
             return mEmail;
         }
 
+        CPtr<UInt> GetCharacters() const
+        {
+            return { Ptr<UInt>(mCharacters.data()), mCharacters.size()};
+        }
     private:
 
         // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
         // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
-        const UInt mID;
-        const SStr mUsername;
-        const SStr mPassword;
-        const SStr mEmail;
+        const UInt          mID;
+        const SStr          mUsername;
+        const SStr          mPassword;
+        const SStr          mEmail;
+        const Vector<UInt>  mCharacters;
     };
 }

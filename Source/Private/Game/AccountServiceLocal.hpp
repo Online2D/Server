@@ -27,7 +27,7 @@ namespace Game
     public:
 
         // -=(Undocumented)=-
-        static constexpr CStr kFilesystemUri = "Filesystem://Accounts/";
+        static constexpr UInt kMaxCharacters = 5;
 
     public:
 

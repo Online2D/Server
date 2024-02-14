@@ -98,6 +98,7 @@ namespace Endpoint
         if (Account && Account->GetPassword() == Message.Password)
         {
             // TODO: Logged
+            Client->Write(LobbyAccountLogged());
         }
         else
         {
@@ -121,10 +122,11 @@ namespace Endpoint
 
         if (!Account)
         {
-            Account = NewPtr<Game::Account>(1 /* TODO */, Message.Username, Message.Password, Message.Email);
+            Account = NewPtr<Game::Account>(1 /* TODO */, Message.Username, Message.Password, Message.Email, /* TODO : check if needed here*/ Vector<UInt>(5));
 
             if (mAccountService->Create(Account))
             {
+                Client->Write(LobbyAccountLogged());
                 // TODO: Created -> Login
             }
             else

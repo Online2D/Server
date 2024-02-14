@@ -32,7 +32,7 @@ namespace Game
 
     Bool AccountServiceLocal::Create(ConstSPtr<Account> Account)
     {
-        const Content::Uri Uri(Format("Database://Account/{}", Account->GetUsername()));
+        const Content::Uri Uri(Format("Database://Account/{}.{}", Account->GetUsername(), "acc"));
 
         return mFilesystem->Save(Uri, Save(Account));
     }
@@ -42,7 +42,7 @@ namespace Game
 
     Bool AccountServiceLocal::Delete(ConstSPtr<Account> Account)
     {
-        Content::Uri Uri(Format("Database://Account/{}", Account->GetUsername()));
+        Content::Uri Uri(Format("Database://Account/{}.{}", Account->GetUsername(), "acc"));
 
         return mFilesystem->Delete(Uri);
     }
@@ -52,7 +52,7 @@ namespace Game
 
     Bool AccountServiceLocal::Update(ConstSPtr<Account> Account)
     {
-        const Content::Uri Uri(Format("Database://Account/{}", Account->GetUsername()));
+        const Content::Uri Uri(Format("Database://Account/{}.{}", Account->GetUsername(), "acc"));
 
         return mFilesystem->Save(Uri, Save(Account));
     }
@@ -70,7 +70,7 @@ namespace Game
 
     SPtr<Account> AccountServiceLocal::GetByUsername(CStr Username)
     {
-        const Content::Uri Uri(Format("Database://Account/{}", Username));
+        const Content::Uri Uri(Format("Database://Account/{}.{}", Username, "acc"));
 
         if (const Chunk Data = mFilesystem->Find(Uri); Data.HasData())
         {
@@ -87,11 +87,24 @@ namespace Game
         TOMLParser  Parser(Data);
         TOMLSection Root = Parser.GetRoot();
 
+        TOMLSection Characters = Root.GetSection("Characters");
+
+        //TODO check
+        TOMLArray CharactersArray = Characters.GetArray("ID");
+        Vector<UInt> CharacterList;
+
+        for (UInt i = 0; i < kMaxCharacters; ++i)
+        {
+            CharacterList.push_back(CharactersArray.GetNumber(i));
+        }
+        //TODO check
+
         return NewPtr<Account>(
             Root.GetNumber("ID"),
             Root.GetString("Username"),
             Root.GetString("Password"),
-            Root.GetString("Email"));
+            Root.GetString("Email"),
+            CharacterList);
     }
 
     // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
@@ -106,6 +119,14 @@ namespace Game
         Root.SetString("Username", Account->GetUsername());
         Root.SetString("Password", Account->GetPassword());
         Root.SetString("Email", Account->GetEmail());
+
+        TOMLSection Characters = Root.SetSection("Characters");
+        TOMLArray CharacterArray = Characters.SetArray("ID");
+
+        for (UInt i = 0; i < kMaxCharacters; ++i)
+        {
+            CharacterArray.AddNumber(0);
+        }
 
         return Parser.Dump();
     }
