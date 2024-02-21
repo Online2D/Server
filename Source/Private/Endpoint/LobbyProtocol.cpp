@@ -193,4 +193,3 @@ namespace Endpoint
         return Email.find_first_of('@') != CStr::npos;
     }
 }
-

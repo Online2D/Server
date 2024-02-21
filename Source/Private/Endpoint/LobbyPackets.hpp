@@ -32,14 +32,14 @@ namespace Endpoint
             AlreadyExist,
         };
 
-        ID Message;
+        ID Type;
 
         // -=(Undocumented)=-
         LobbyAccountError() = default;
 
         // -=(Undocumented)=-
-        LobbyAccountError(ID Message)
-            : Message { Message }
+        LobbyAccountError(ID Type)
+            : Type { Type }
         {
         }
 
@@ -47,7 +47,7 @@ namespace Endpoint
         template<typename Stream>
         void OnSerialize(Stream Archive)
         {
-            Archive.SerializeEnum(Message);
+            Archive.SerializeEnum(Type);
         }
     };
 

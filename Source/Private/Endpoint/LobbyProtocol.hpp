@@ -14,9 +14,9 @@
 
 #include <Network/Client.hpp>
 #include <Network/Protocol.hpp>
-#include <Game/AccountServiceLocal.hpp>
-
 #include "LobbyPackets.hpp"
+#include "Game/AccountServiceLocal.hpp"
+
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 // [   CODE   ]
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
@@ -28,6 +28,7 @@ namespace Endpoint
     {
     public:
 
+        // -=(Undocumented)=-
         LobbyProtocol(ConstSPtr<Game::AccountServiceLocal> AccountService);
 
         // -=(Undocumented)=-
