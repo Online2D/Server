@@ -24,33 +24,22 @@ public:
     // -=(Undocumented)=-
     void OnInitialize()
     {
-        ::CreateDirectoryA("./Database", nullptr);
-        ::CreateDirectoryA("./Database/Account", nullptr);
-
-
-        // App.Path & "/Database"
-        GetSubsystem<Content::Service>()->AddLocator("Database", NewPtr<Content::SystemLocator>("Database"));
-
-
         mAccountService = NewPtr<Game::AccountServiceLocal>(GetContext());
-        mServerLobbyProtocol = NewPtr<Endpoint::LobbyProtocol>(mAccountService);
 
-        mServer = GetSubsystem<Network::Service>()->Listen(1000, "0.0.0.0", "7666");
-        mServer->Attach(mServerLobbyProtocol);
-
+        mServer = GetSubsystem<Network::Service>()->Listen("0.0.0.0", 7666);
+        mServer->SetProtocol(NewPtr<Endpoint::LobbyProtocol>(mAccountService));
     }
 
     // -=(Undocumented)=-
     void OnTick() override
     {
-        mServer->Flush();
+
     }
 
 private:
 
     SPtr<Game::AccountServiceLocal> mAccountService;
     SPtr<Network::Server>           mServer;
-    SPtr<Endpoint::LobbyProtocol>   mServerLobbyProtocol;
 };
 
 

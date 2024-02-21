@@ -97,11 +97,11 @@ namespace Endpoint
 
         if (Account && Account->GetPassword() == Message.Password)
         {
-            // TODO: Logged
+            Client->Write(LobbyAccountError(LobbyAccountError::ID::Invalid));
         }
         else
         {
-            // TODO: Error: Not Found
+            Client->Write(LobbyAccountError(LobbyAccountError::ID::InvalidCredentials));
         }
     }
 
@@ -129,12 +129,12 @@ namespace Endpoint
             }
             else
             {
-                // TODO: Error: Failed to create
+                Client->Write(LobbyAccountError(LobbyAccountError::ID::Invalid));
             }
         }
         else
         {
-            // TODO: Error: Already created
+            Client->Write(LobbyAccountError(LobbyAccountError::ID::AlreadyExist));
         }
     }
 
@@ -160,12 +160,12 @@ namespace Endpoint
             }
             else
             {
-                // TODO: Error: Failed to delete
+                Client->Write(LobbyAccountError(LobbyAccountError::ID::Invalid));
             }
         }
         else
         {
-            // TODO: Error: Not Found
+            Client->Write(LobbyAccountError(LobbyAccountError::ID::InvalidCredentials));
         }
     }
 

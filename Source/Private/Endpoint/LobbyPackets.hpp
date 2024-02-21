@@ -21,6 +21,37 @@
 namespace Endpoint
 {
     // -=(Undocumented)=-
+    struct LobbyAccountError
+        : public Network::Packet<LobbyAccountError, 0>
+    {
+        // -=(Undocumented)=-
+        enum class ID
+        {
+            Invalid,
+            InvalidCredentials,
+            AlreadyExist,
+        };
+
+        ID Message;
+
+        // -=(Undocumented)=-
+        LobbyAccountError() = default;
+
+        // -=(Undocumented)=-
+        LobbyAccountError(ID Message)
+            : Message { Message }
+        {
+        }
+
+        // -=(Undocumented)=-
+        template<typename Stream>
+        void OnSerialize(Stream Archive)
+        {
+            Archive.SerializeEnum(Message);
+        }
+    };
+
+    // -=(Undocumented)=-
     struct LobbyAccountLogin
         : public Network::Packet<LobbyAccountLogin, 1>
     {

@@ -11,6 +11,7 @@
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
 #include "AccountServiceLocal.hpp"
+#include <Content/Locator/SystemLocator.hpp>
 
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 // [   CODE   ]
@@ -24,7 +25,7 @@ namespace Game
     AccountServiceLocal::AccountServiceLocal(Ref<Subsystem::Context> Context)
         : mFilesystem { Context.GetSubsystem<Content::Service>() }
     {
-
+        mFilesystem->AddLocator("Accounts", NewPtr<Content::SystemLocator>("Database/Account"));
     }
 
     // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
@@ -32,7 +33,7 @@ namespace Game
 
     Bool AccountServiceLocal::Create(ConstSPtr<Account> Account)
     {
-        const Content::Uri Uri(Format("Database://Account/{}", Account->GetUsername()));
+        const Content::Uri Uri(Format("Accounts://{}", Account->GetUsername()));
 
         return mFilesystem->Save(Uri, Save(Account));
     }
@@ -42,7 +43,7 @@ namespace Game
 
     Bool AccountServiceLocal::Delete(ConstSPtr<Account> Account)
     {
-        Content::Uri Uri(Format("Database://Account/{}", Account->GetUsername()));
+        Content::Uri Uri(Format("Accounts://{}", Account->GetUsername()));
 
         return mFilesystem->Delete(Uri);
     }
@@ -52,7 +53,7 @@ namespace Game
 
     Bool AccountServiceLocal::Update(ConstSPtr<Account> Account)
     {
-        const Content::Uri Uri(Format("Database://Account/{}", Account->GetUsername()));
+        const Content::Uri Uri(Format("Accounts://{}", Account->GetUsername()));
 
         return mFilesystem->Save(Uri, Save(Account));
     }
@@ -70,7 +71,7 @@ namespace Game
 
     SPtr<Account> AccountServiceLocal::GetByUsername(CStr Username)
     {
-        const Content::Uri Uri(Format("Database://Account/{}", Username));
+        const Content::Uri Uri(Format("Accounts://{}", Username));
 
         if (const Chunk Data = mFilesystem->Find(Uri); Data.HasData())
         {
