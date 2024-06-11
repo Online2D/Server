@@ -1,5 +1,5 @@
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-// Copyright (C) 2024 by Online-MMO-Engine Team. All rights reserved.
+// Copyright (C) 2024 by Agustin L. Alvarez. All rights reserved.
 //
 // This work is licensed under the terms of the MIT license.
 //
@@ -12,32 +12,42 @@
 // [  HEADER  ]
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
-#include "Account.hpp"
+#include <Engine/Kernel.hpp>
+#include "Options.hpp"
 
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 // [   CODE   ]
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
-namespace Game
+namespace Foundation
 {
     // -=(Undocumented)=-
-    class AccountService
+    class Application final : public Engine::Kernel
     {
     public:
 
         // -=(Undocumented)=-
-        virtual Bool Create(ConstSPtr<Account> Account) = 0;
+        Ref<const Options> GetOptions() const
+        {
+            return mOptions;
+        }
 
-        // -=(Undocumented)=-
-        virtual Bool Delete(ConstSPtr<Account> Account) = 0;
+    private:
 
-        // -=(Undocumented)=-
-        virtual Bool Update(ConstSPtr<Account> Account) = 0;
+        // \see Kernel::OnInitialize
+        Bool OnInitialize() override;
 
-        // -=(Undocumented)=-
-        virtual SPtr<Account> GetByID(UInt ID) = 0;
+        // \see Kernel::OnDestroy
+        void OnDestroy() override;
 
-        // -=(Undocumented)=-
-        virtual SPtr<Account> GetByUsername(CStr Username) = 0;
+        // \see Kernel::OnTick
+        void OnTick(Real64 Time) override;
+
+    private:
+
+        // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+        // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+
+        Options mOptions;
     };
 }

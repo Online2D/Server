@@ -1,5 +1,5 @@
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-// Copyright (C) 2024 by Online-MMO-Engine Team. All rights reserved.
+// Copyright (C) 2024 by Agustin L. Alvarez. All rights reserved.
 //
 // This work is licensed under the terms of the MIT license.
 //
@@ -12,67 +12,79 @@
 // [  HEADER  ]
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
-#include <Network/Client.hpp>
-#include <Network/Protocol.hpp>
-#include "LobbyPackets.hpp"
-#include "Game/AccountServiceLocal.hpp"
+#include "Core/Serialization/TOML/Parser.hpp"
 
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 // [   CODE   ]
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
-namespace Endpoint
+namespace Foundation
 {
     // -=(Undocumented)=-
-    class LobbyProtocol final : public Network::Protocol
+    class Options final
     {
     public:
 
         // -=(Undocumented)=-
-        LobbyProtocol(ConstSPtr<Game::AccountServiceLocal> AccountService);
+        void Load(CStr Content);
 
         // -=(Undocumented)=-
-        void OnAttach(ConstSPtr<Network::Client> Client) override;
+        UInt GetServerPort() const
+        {
+            return mServerPort;
+        }
 
         // -=(Undocumented)=-
-        void OnDetach(ConstSPtr<Network::Client> Client) override;
+        UInt GetServerCapacity() const
+        {
+            return mServerCapacity;
+        }
 
         // -=(Undocumented)=-
-        void OnError(ConstSPtr<Network::Client> Client, UInt Error, CStr Description) override;
+        CStr GetDatabaseAddress() const
+        {
+            return mDatabaseAddress;
+        }
 
         // -=(Undocumented)=-
-        void OnRead(ConstSPtr<Network::Client> Client,  CPtr<UInt08> Bytes) override;
+        UInt GetDatabasePort() const
+        {
+            return mDatabasePort;
+        }
 
         // -=(Undocumented)=-
-        void OnWrite(ConstSPtr<Network::Client> Client, CPtr<UInt08> Bytes) override;
-
-    private:
-
-        // -=(Undocumented)=-
-        void Handle_LobbyAccountLogin(ConstSPtr<Network::Client> Client, Ref<const LobbyAccountLogin> Message);
+        CStr GetDatabaseUser() const
+        {
+            return mDatabaseUser;
+        }
 
         // -=(Undocumented)=-
-        void Handle_LobbyAccountRegister(ConstSPtr<Network::Client> Client, Ref<const LobbyAccountRegister> Message);
+        CStr GetDatabasePassword() const
+        {
+            return mDatabasePassword;
+        }
 
         // -=(Undocumented)=-
-        void Handle_LobbyAccountDelete(ConstSPtr<Network::Client> Client, Ref<const LobbyAccountDelete> Message);
-
-    private:
-
-        // -=(Undocumented)=-
-        Bool Validate_Username(CStr Username);
-
-        // -=(Undocumented)=-
-        Bool Validate_Password(CStr Password);
-
-        // -=(Undocumented)=-
-        Bool Validate_Email(CStr Email);
+        CStr GetDatabaseDB() const
+        {
+            return mDatabaseDB;
+        }
 
     private:
 
         // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
         // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
-        SPtr<Game::AccountServiceLocal> mAccountService;
+        UInt mServerPort;
+        UInt mServerCapacity;
+
+        // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+        // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+
+        SStr mDatabaseAddress;
+        UInt mDatabasePort;
+        SStr mDatabaseUser;
+        SStr mDatabasePassword;
+        SStr mDatabaseDB;
     };
 }

@@ -1,5 +1,5 @@
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-// Copyright (C) 2024 by Online-MMO-Engine Team. All rights reserved.
+// Copyright (C) 2024 by Agustin L. Alvarez. All rights reserved.
 //
 // This work is licensed under the terms of the MIT license.
 //
@@ -12,50 +12,67 @@
 // [  HEADER  ]
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
-#include <Core/Types.hpp>
+#include <Network/Service.hpp>
+#include "Foundation/Account/Account.hpp"
 
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 // [   CODE   ]
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
-namespace Game
+namespace Foundation
 {
     // -=(Undocumented)=-
-    class Account
+    class Peer final
     {
     public:
 
         // -=(Undocumented)=-
-        Account(UInt ID, CStr Username, CStr Password, CStr Email)
-            : mID       { ID },
-              mUsername { Username },
-              mPassword { Password },
-              mEmail    { Email }
-        {
-        }
+        Peer(ConstSPtr<Network::Client> Connection);
 
         // -=(Undocumented)=-
         UInt GetID() const
         {
-            return mID;
+            return mConnection->GetID();
         }
 
         // -=(Undocumented)=-
-        CStr GetUsername() const
+        void SetAccount(ConstSPtr<Account> Account)
         {
-            return mUsername;
+            mAccount = Account;
         }
 
         // -=(Undocumented)=-
-        CStr GetPassword() const
+        ConstSPtr<Account> GetAccount() const
         {
-            return mPassword;
+            return mAccount;
         }
 
         // -=(Undocumented)=-
-        CStr GetEmail() const
+        template<typename Message>
+        void Close(Message && Packet)
         {
-            return mEmail;
+            mConnection->Write(Packet, false);
+            mConnection->Close(false);
+        }
+
+        // -=(Undocumented)=-
+        void Close()
+        {
+            mConnection->Close(true);
+        }
+
+        // -=(Undocumented)=-
+        template<typename Message>
+        void Write(Message && Packet, Bool Unreliable = false)
+        {
+            if constexpr (std::is_base_of_v<Writer, Message>)
+            {
+                mConnection->Write(Packet.GetData(), Unreliable);
+            }
+            else
+            {
+                mConnection->Write(Packet, Unreliable);
+            }
         }
 
     private:
@@ -63,9 +80,7 @@ namespace Game
         // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
         // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
-        const UInt mID;
-        const SStr mUsername;
-        const SStr mPassword;
-        const SStr mEmail;
+        SPtr<Network::Client> mConnection;
+        SPtr<Account>         mAccount;
     };
 }

@@ -1,5 +1,5 @@
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-// Copyright (C) 2024 by Online-MMO-Engine Team. All rights reserved.
+// Copyright (C) 2024 by Agustin L. Alvarez. All rights reserved.
 //
 // This work is licensed under the terms of the MIT license.
 //
@@ -10,104 +10,82 @@
 // [  HEADER  ]
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
-#include "AccountServiceLocal.hpp"
-#include <Content/Locator/SystemLocator.hpp>
+#include "AccountRepository.hpp"
 
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 // [   CODE   ]
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
-namespace Game
+namespace Foundation
 {
     // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
     // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
-    AccountServiceLocal::AccountServiceLocal(Ref<Subsystem::Context> Context)
-        : mFilesystem { Context.GetSubsystem<Content::Service>() }
+    AccountRepository::AccountRepository(ConstSPtr<Database> Database)
+        : mDatabase { Database }
     {
-        mFilesystem->AddLocator("Accounts", NewPtr<Content::SystemLocator>("Database/Account"));
     }
 
     // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
     // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
-    Bool AccountServiceLocal::Create(ConstSPtr<Account> Account)
+    Bool AccountRepository::Create(ConstSPtr<Account> Account)
     {
-        const Content::Uri Uri(Format("Accounts://{}", Account->GetUsername()));
-
-        return mFilesystem->Save(Uri, Save(Account));
+        static constexpr CStr kStatement = "INSERT INTO public.\"Account\" (Name, Password, Email) VALUES ($1, $2, $3)";
+        return (mDatabase->Query(
+            kStatement, Account->GetUsername(), Account->GetPassword(), Account->GetEmail()).affected_rows() > 0);
     }
 
     // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
     // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
-    Bool AccountServiceLocal::Delete(ConstSPtr<Account> Account)
+    Bool AccountRepository::Delete(ConstSPtr<Account> Account)
     {
-        Content::Uri Uri(Format("Accounts://{}", Account->GetUsername()));
-
-        return mFilesystem->Delete(Uri);
+        static constexpr CStr kStatement = "DELETE FROM public.\"Account\" WHERE id=$1";
+        return (mDatabase->Query(kStatement, Account->GetID()).affected_rows() > 0);
     }
 
     // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
     // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
-    Bool AccountServiceLocal::Update(ConstSPtr<Account> Account)
+    Bool AccountRepository::Update(ConstSPtr<Account> Account)
     {
-        const Content::Uri Uri(Format("Accounts://{}", Account->GetUsername()));
-
-        return mFilesystem->Save(Uri, Save(Account));
+        static constexpr CStr kStatement = "UPDATE public.\"Account\" SET name=$2, password=$3, email=$4 WHERE id=$1";
+        return (mDatabase->Query(
+            kStatement, Account->GetID(), Account->GetUsername(), Account->GetPassword(), Account->GetEmail()).affected_rows() > 0);
     }
 
     // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
     // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
-    SPtr<Account> AccountServiceLocal::GetByID(UInt ID)
+    SPtr<Account> AccountRepository::GetByID(UInt ID)
     {
-        return nullptr; // TODO
+        static constexpr CStr kStatement = "SELECT * FROM public.\"Account\" WHERE id=$1";
+
+        const pqxx::result Result = mDatabase->Query(kStatement, ID);
+        return (Result.empty() ? nullptr : Load(Result.front()));
     }
 
     // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
     // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
-    SPtr<Account> AccountServiceLocal::GetByUsername(CStr Username)
+    SPtr<Account> AccountRepository::GetByUsername(CStr Username)
     {
-        const Content::Uri Uri(Format("Accounts://{}", Username));
+        static constexpr CStr kStatement = "SELECT * FROM public.\"Account\" WHERE name=$1";
 
-        if (const Chunk Data = mFilesystem->Find(Uri); Data.HasData())
-        {
-            return Load(Data.GetText());
-        }
-        return nullptr;
+        const pqxx::result Result = mDatabase->Query(kStatement, Username);
+        return (Result.empty() ? nullptr : Load(Result.front()));
     }
 
     // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
     // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
-    SPtr<Account> AccountServiceLocal::Load(CStr Data)
+    SPtr<Account> AccountRepository::Load(Ref<const pqxx::row> Entry)
     {
-        TOMLParser  Parser(Data);
-        TOMLSection Root = Parser.GetRoot();
-
         return NewPtr<Account>(
-            Root.GetNumber("ID"),
-            Root.GetString("Username"),
-            Root.GetString("Password"),
-            Root.GetString("Email"));
-    }
-
-    // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-    // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-
-    SStr AccountServiceLocal::Save(ConstSPtr<Account> Account)
-    {
-        TOMLParser  Parser;
-        TOMLSection Root = Parser.GetRoot();
-
-        Root.SetNumber("ID", Account->GetID());
-        Root.SetString("Username", Account->GetUsername());
-        Root.SetString("Password", Account->GetPassword());
-        Root.SetString("Email", Account->GetEmail());
-
-        return Parser.Dump();
+            Entry["id"].as<UInt>(),
+            Entry["name"].as<CStr>(),
+            Entry["password"].as<CStr>(),
+            Entry["email"].as<CStr>());
     }
 }

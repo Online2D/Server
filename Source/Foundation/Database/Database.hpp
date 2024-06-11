@@ -1,5 +1,5 @@
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-// Copyright (C) 2024 by Online-MMO-Engine Team. All rights reserved.
+// Copyright (C) 2024 by Agustin L. Alvarez. All rights reserved.
 //
 // This work is licensed under the terms of the MIT license.
 //
@@ -12,56 +12,50 @@
 // [  HEADER  ]
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
-#include <Content/Service.hpp>
-#include "AccountService.hpp"
+#include <Core/Core.hpp>
+#include <pqxx/pqxx>
 
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 // [   CODE   ]
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
-namespace Game
+namespace Foundation
 {
     // -=(Undocumented)=-
-    class AccountServiceLocal final : public AccountService
+    // @TODO: Connection Pool + Async
+    class Database final : public Subsystem
     {
     public:
 
         // -=(Undocumented)=-
-        static constexpr CStr kFilesystemUri = "Filesystem://Accounts/";
-
-    public:
+        Database(Ref<Context> Context);
 
         // -=(Undocumented)=-
-        AccountServiceLocal(Ref<Subsystem::Context> Context);
+        Bool Connect(CStr Hostname, UInt16 Port, CStr Username, CStr Password, CStr Database);
 
         // -=(Undocumented)=-
-        Bool Create(ConstSPtr<Account> Account) override;
-
-        // -=(Undocumented)=-
-        Bool Delete(ConstSPtr<Account> Account) override;
-
-        // -=(Undocumented)=-
-        Bool Update(ConstSPtr<Account> Account) override;
-
-        // -=(Undocumented)=-
-        SPtr<Account> GetByID(UInt ID) override;
-
-        // -=(Undocumented)=-
-        SPtr<Account> GetByUsername(CStr Username) override;
-
-    private:
-
-        // -=(Undocumented)=-
-        SPtr<Account> Load(CStr Data);
-
-        // -=(Undocumented)=-
-        SStr Save(ConstSPtr<Account> Account);
+        template<typename... Types>
+        pqxx::result Query(CStr Statement, Types ... Values)
+        {
+            pqxx::result Result;
+            try
+            {
+                pqxx::work Transaction(* mConnection);
+                Result = Transaction.exec_params(pqxx::zview(Statement), Values...);
+                Transaction.commit();
+            }
+            catch (Ref<const pqxx::sql_error> Exception)
+            {
+                Result = pqxx::result();
+            }
+            return Result;
+        }
 
     private:
 
         // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
         // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
-        SPtr<Content::Service> mFilesystem;
+        UPtr<pqxx::connection> mConnection;
     };
 }
