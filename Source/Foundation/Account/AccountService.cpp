@@ -37,18 +37,18 @@ namespace Foundation
             return Error::Invalid;
         }
 
-        const SPtr<Account> User = mRepository.GetByUsername(Username);
-        if (!User || User->GetPassword() != Password)
+        const SPtr<Account> Account = mRepository.GetByUsername(Username);
+        if (!Account || Account->GetPassword() != Password)
         {
             return Error::Mismatch;
         }
 
-        if (mRegistry.contains(User->GetID()))
+        if (mRegistry.contains(Account->GetID()))
         {
             return Error::Connected;
         }
 
-        mRegistry.try_emplace(User->GetID(), User);
+        mRegistry.try_emplace(Account->GetID(), Account);
         return Error::None;
     }
 
@@ -70,9 +70,9 @@ namespace Foundation
             return Error::Invalid;
         }
 
-        const SPtr<Account> User = NewPtr<Account>(0, Username, Password, Email);
+        const SPtr<Account> Account = NewPtr<Foundation::Account>(0, Username, Password, Email);
 
-        return mRepository.Create(User) ? Error::None : Error::Exist;
+        return mRepository.Create(Account) ? Error::None : Error::Exist;
     }
 
     // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
@@ -85,13 +85,13 @@ namespace Foundation
             return Error::Invalid;
         }
 
-        const SPtr<Account> User = mRepository.GetByUsername(Username);
-        if (!User || User->GetPassword() != Password)
+        const SPtr<Account> Account = mRepository.GetByUsername(Username);
+        if (!Account || Account->GetPassword() != Password)
         {
             return Error::Mismatch;
         }
 
-        return mRepository.Delete(User) ? Error::None : Error::Invalid;
+        return mRepository.Delete(Account) ? Error::None : Error::Invalid;
     }
 
     // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-

@@ -71,12 +71,13 @@ namespace Foundation
         const SPtr<Peer> Session = mRegistry.at(Connection->GetID());
         mRegistry.erase(Connection->GetID());
 
-        // TODO: OnDisconnect(Peer)
+        // TODO Release the player attached to the peer
 
-        ConstSPtr<Account> User = Session->GetAccount();
-        if (User)
+        // Release the account attached to the peer
+        ConstSPtr<Account> Account = Session->GetAccount();
+        if (Account)
         {
-            mAccounts.Logout(User->GetID());
+            mAccounts.Logout(Account->GetID());
         }
     }
 
