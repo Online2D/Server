@@ -14,6 +14,7 @@
 
 #include "Peer.hpp"
 #include "Packet/GatewayPackets.hpp"
+#include "Packet/LobbyPackets.hpp"
 
 #include "Foundation/Account/AccountService.hpp"
 
@@ -109,6 +110,15 @@ namespace Foundation
 
         // -=(Undocumented)=-
         void NotifyError(ConstSPtr<Peer> Session, AccountService::Error Error);
+
+        // -=(Undocumented)=-
+        void OnHandle(ConstSPtr<Peer> Session, Ref<const LobbyCharacterEnter> Message);
+
+        // -=(Undocumented)=-
+        void OnHandle(ConstSPtr<Peer> Session, Ref<const LobbyCharacterDelete> Message);
+
+        // -=(Undocumented)=-
+        void OnHandle(ConstSPtr<Peer> Session, Ref<const LobbyCharacterCreate> Message);
 
     private:
 

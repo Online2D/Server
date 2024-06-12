@@ -34,8 +34,8 @@ namespace Foundation
         Bool Connect(CStr Hostname, UInt16 Port, CStr Username, CStr Password, CStr Database);
 
         // -=(Undocumented)=-
-        template<typename... Types>
-        pqxx::result Query(CStr Statement, Types ... Values)
+        template<typename... Args>
+        pqxx::result Query(CStr Statement, Args ... Values)
         {
             pqxx::result Result;
             try
@@ -49,6 +49,22 @@ namespace Foundation
                 Result = pqxx::result();
             }
             return Result;
+        }
+
+        // -=(Undocumented)=-
+        template<typename Type, typename Factory, typename... Args>
+        Vector<Type> QueryAll(CStr Statement, Factory OnRead, Args ... Values)
+        {
+            const pqxx::result Result = Query(Statement, Values...);
+
+            Vector<Type> Collection;
+            Collection.reserve(Result.size());
+
+            for (Ref<const pqxx::row> Entry : Result)
+            {
+                Collection.emplace_back(OnRead(Entry));
+            }
+            return Collection;
         }
 
     private:

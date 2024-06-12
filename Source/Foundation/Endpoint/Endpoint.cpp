@@ -102,6 +102,15 @@ namespace Foundation
             case GatewayAccountDelete::kID:
                 OnHandle(Session, GatewayAccountDelete(Archive));
                 break;
+            case LobbyCharacterEnter::kID:
+                OnHandle(Session, LobbyCharacterEnter(Archive));
+                break;
+            case LobbyCharacterDelete::kID:
+                OnHandle(Session, LobbyCharacterDelete(Archive));
+                break;
+            case LobbyCharacterCreate::kID:
+                OnHandle(Session, LobbyCharacterCreate(Archive));
+                break;
             }
         }
         while (Archive.GetAvailable() > 0);
@@ -182,4 +191,50 @@ namespace Foundation
             break;
         }
     }
+
+    // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+    // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+
+    void Endpoint::OnHandle(ConstSPtr<Peer> Session, Ref<const LobbyCharacterEnter> Message)
+    {
+        if (Session->GetAccount())
+        {
+            // TODO Handle Message
+        }
+        else
+        {
+            Session->Close();
+        }
+    }
+
+    // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+    // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+
+    void Endpoint::OnHandle(ConstSPtr<Peer> Session, Ref<const LobbyCharacterDelete> Message)
+    {
+        if (Session->GetAccount())
+        {
+            // TODO Handle Message
+        }
+        else
+        {
+            Session->Close();
+        }
+    }
+
+    // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+    // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+
+    void Endpoint::OnHandle(ConstSPtr<Peer> Session, Ref<const LobbyCharacterCreate> Message)
+    {
+        if (Session->GetAccount())
+        {
+            // TODO Handle Message
+        }
+        else
+        {
+            Session->Close();
+        }
+    }
+
 }
